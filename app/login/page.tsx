@@ -15,11 +15,11 @@ const Login = () => {
       const { error } = await authClient.signIn.social(
         {
           provider: "google",
-          callbackURL: "/dashboard",
+          callbackURL: "/record-screen",
         },
         {
           onRequest: () => setLoading(true),
-          onSuccess: () => router.push("/dashboard"),
+          onSuccess: () => router.push("/record-screen"),
           onError: (ctx) => setError(ctx.error.message || "Sign in failed"),
         }
       );
