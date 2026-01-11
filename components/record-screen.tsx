@@ -7,13 +7,13 @@ import { useScreenRecording } from "@/lib/hooks/useScreenRecording";
 import { ICONS } from "@/constants";
 
 const RecordScreen = () => {
-  const router = useRouter();
+  // const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
   const {
     isRecording,
-    recordedBlob,
+    // recordedBlob,
     recordedVideoUrl,
     recordingDuration,
     startRecording,
@@ -38,22 +38,22 @@ const RecordScreen = () => {
     }
   };
 
-  const goToUpload = () => {
-    if (!recordedBlob) return;
-    const url = URL.createObjectURL(recordedBlob);
-    sessionStorage.setItem(
-      "recordedVideo",
-      JSON.stringify({
-        url,
-        name: "screen-recording.webm",
-        type: recordedBlob.type,
-        size: recordedBlob.size,
-        duration: recordingDuration || 0,
-      })
-    );
-    router.push("/upload");
-    closeModal();
-  };
+  // const goToUpload = () => {
+  //   if (!recordedBlob) return;
+  //   const url = URL.createObjectURL(recordedBlob);
+  //   sessionStorage.setItem(
+  //     "recordedVideo",
+  //     JSON.stringify({
+  //       url,
+  //       name: "screen-recording.webm",
+  //       type: recordedBlob.type,
+  //       size: recordedBlob.size,
+  //       duration: recordingDuration || 0,
+  //     })
+  //   );
+  //   router.push("/upload");
+  //   closeModal();
+  // };
 
   return (
     <div className="record">
@@ -220,7 +220,7 @@ const RecordScreen = () => {
                     >
                       Record Again
                     </button>
-                    <button
+                    {/* <button
                       onClick={goToUpload}
                       className="group flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98] font-semibold"
                     >
@@ -231,7 +231,7 @@ const RecordScreen = () => {
                         height={20}
                       />
                       Continue to Upload
-                    </button>
+                    </button> */}
                   </>
                 )}
               </div>
