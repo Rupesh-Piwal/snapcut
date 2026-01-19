@@ -2,13 +2,30 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Pause, Square, Video, RefreshCw, Trash2, Upload, Copy, ExternalLink, AlertTriangle } from "lucide-react";
+import {
+  Pause,
+  Square,
+  Video,
+  RefreshCw,
+  Trash2,
+  Upload,
+  Copy,
+  ExternalLink,
+  AlertTriangle,
+} from "lucide-react";
 import { usePiPRecording } from "@/lib/hooks/usePiPRecording";
 import { Progress } from "@/components/ui/progress";
 
 // FSM State Definition
 // Idle -> Recording <-> Paused -> Stopping -> Completed -> Uploading -> Share Ready
-type RecordingState = "idle" | "recording" | "paused" | "stopping" | "completed" | "uploading" | "share-ready";
+type RecordingState =
+  | "idle"
+  | "recording"
+  | "paused"
+  | "stopping"
+  | "completed"
+  | "uploading"
+  | "share-ready";
 
 export default function RecordingInterface() {
   // Main finite state machine for the UI
@@ -42,7 +59,7 @@ export default function RecordingInterface() {
     toggleWebcam,
     recordedBlob,
     recordedVideoUrl,
-    resetRecording
+    resetRecording,
   } = usePiPRecording();
 
   const [overlaySize, setOverlaySize] = useState(160);
@@ -80,15 +97,15 @@ export default function RecordingInterface() {
 
       setWebcamPos({
         x: defaultCanvasX * scaleX,
-        y: defaultCanvasY * scaleY
+        y: defaultCanvasY * scaleY,
       });
       setIsInitialized(true);
     }
   }, [containerRef.current, canvasDimensions, isInitialized]);
 
   useEffect(() => {
-    window.addEventListener('resize', updateOverlaySize);
-    return () => window.removeEventListener('resize', updateOverlaySize);
+    window.addEventListener("resize", updateOverlaySize);
+    return () => window.removeEventListener("resize", updateOverlaySize);
   }, [updateOverlaySize]);
 
   // --- Drag Logic ---
@@ -114,8 +131,14 @@ export default function RecordingInterface() {
       const container = containerRef.current.getBoundingClientRect();
       const boxSize = overlaySize;
 
-      const newX = Math.min(Math.max(0, initialPosRef.current.x + deltaX), container.width - boxSize);
-      const newY = Math.min(Math.max(0, initialPosRef.current.y + deltaY), container.height - boxSize);
+      const newX = Math.min(
+        Math.max(0, initialPosRef.current.x + deltaX),
+        container.width - boxSize,
+      );
+      const newY = Math.min(
+        Math.max(0, initialPosRef.current.y + deltaY),
+        container.height - boxSize,
+      );
 
       setWebcamPos({ x: newX, y: newY });
 
@@ -127,7 +150,7 @@ export default function RecordingInterface() {
         x: newX * scaleX,
         y: newY * scaleY,
         width: 320,
-        height: 320
+        height: 320,
       });
     };
 
@@ -142,7 +165,6 @@ export default function RecordingInterface() {
       window.removeEventListener("mouseup", handleMouseUp);
     };
   }, [isDragging, canvasDimensions, setWebcamConfig, overlaySize]);
-
 
   // --- FSM Transitions & Logic ---
 
@@ -182,8 +204,8 @@ export default function RecordingInterface() {
           setRecordingState("stopping");
           // Hook handles cleanup internally
         };
-        track.addEventListener('ended', handleTrackEnded);
-        return () => track.removeEventListener('ended', handleTrackEnded);
+        track.addEventListener("ended", handleTrackEnded);
+        return () => track.removeEventListener("ended", handleTrackEnded);
       }
     }
   }, [isRecording, previewStream]);
@@ -202,19 +224,22 @@ export default function RecordingInterface() {
     }
   }, [webcamEnabled, isRecording, toggleWebcam]);
 
-
   // --- Preview Logic ---
   useEffect(() => {
     if (!previewVideoRef.current) return;
     // Show stream only in active states
-    if (previewStream && (recordingState === "idle" || recordingState === "recording" || recordingState === "paused")) {
+    if (
+      previewStream &&
+      (recordingState === "idle" ||
+        recordingState === "recording" ||
+        recordingState === "paused")
+    ) {
       previewVideoRef.current.srcObject = previewStream;
-      previewVideoRef.current.play().catch(() => { });
+      previewVideoRef.current.play().catch(() => {});
     } else {
       previewVideoRef.current.srcObject = null;
     }
   }, [previewStream, recordingState]);
-
 
   // --- Actions ---
 
@@ -236,18 +261,19 @@ export default function RecordingInterface() {
     // Simulate Upload
     const totalSteps = 100;
     for (let i = 0; i <= totalSteps; i++) {
-      await new Promise(r => setTimeout(r, 30)); // 3 sec total
+      await new Promise((r) => setTimeout(r, 30)); // 3 sec total
       setUploadProgress(i);
     }
 
-    setShareLink(`https://snap-cut.com/v/${Math.random().toString(36).substring(7)}`);
+    setShareLink(
+      `https://snap-cut.com/v/${Math.random().toString(36).substring(7)}`,
+    );
     setRecordingState("share-ready");
   };
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareLink);
   };
-
 
   // --- Render Helpers ---
 
@@ -269,7 +295,9 @@ export default function RecordingInterface() {
           </div>
           <div className="text-center space-y-2">
             <h3 className="text-xl font-bold">Finalizing recording...</h3>
-            <p className="text-muted-foreground text-sm">Saving video and cleaning up. Please don't close this tab.</p>
+            <p className="text-muted-foreground text-sm">
+              Saving video and cleaning up. Please don't close this tab.
+            </p>
           </div>
         </div>
       </div>
@@ -280,19 +308,23 @@ export default function RecordingInterface() {
   return (
     <main className="flex-1 w-full min-h-screen bg-background">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6 max-w-7xl mx-auto h-full">
-
         {/* Main Area */}
         <div className="lg:col-span-3 flex flex-col gap-6">
-
           {/* RECORDING / IDLE VIEW */}
-          {(recordingState === "idle" || recordingState === "recording" || recordingState === "paused") && (
+          {(recordingState === "idle" ||
+            recordingState === "recording" ||
+            recordingState === "paused") && (
             <div className="space-y-4 animate-in fade-in duration-300">
               {/* Preview Canvas */}
               <div
                 ref={containerRef}
-                className={`relative w-full rounded-xl overflow-hidden aspect-video border-2 transition-all duration-300 ${recordingState === "recording" ? "border-red-500 shadow-2xl shadow-red-500/20" :
-                  recordingState === "paused" ? "border-amber-500 shadow-xl shadow-amber-500/20" : "border-border/50 bg-black/50"
-                  }`}
+                className={`relative w-full rounded-xl overflow-hidden aspect-video border-2 transition-all duration-300 ${
+                  recordingState === "recording"
+                    ? "border-red-500 shadow-2xl shadow-red-500/20"
+                    : recordingState === "paused"
+                      ? "border-amber-500 shadow-xl shadow-amber-500/20"
+                      : "border-border/50 bg-black/50"
+                }`}
               >
                 {/* LIVE PREVIEW */}
                 <video
@@ -300,7 +332,7 @@ export default function RecordingInterface() {
                   muted
                   playsInline
                   autoPlay
-                  className={`absolute inset-0 w-full h-full object-contain bg-black transition-opacity duration-300 ${previewStream ? 'opacity-100' : 'opacity-0'}`}
+                  className={`absolute inset-0 w-full h-full object-contain bg-black transition-opacity duration-300 ${previewStream ? "opacity-100" : "opacity-0"}`}
                 />
 
                 {/* Status Overlay */}
@@ -308,13 +340,17 @@ export default function RecordingInterface() {
                   {recordingState === "recording" && (
                     <div className="flex items-center gap-2 bg-red-500/90 text-white px-3 py-1.5 rounded-full backdrop-blur-md shadow-lg animate-in slide-in-from-top-2">
                       <div className="w-2.5 h-2.5 bg-white rounded-full animate-pulse shadow-sm" />
-                      <span className="text-sm font-bold tracking-wide">Recording</span>
+                      <span className="text-sm font-bold tracking-wide">
+                        Recording
+                      </span>
                     </div>
                   )}
                   {recordingState === "paused" && (
                     <div className="flex items-center gap-2 bg-amber-500/90 text-white px-3 py-1.5 rounded-full backdrop-blur-md shadow-lg">
                       <Pause className="w-3.5 h-3.5 fill-current" />
-                      <span className="text-sm font-bold tracking-wide">Paused</span>
+                      <span className="text-sm font-bold tracking-wide">
+                        Paused
+                      </span>
                     </div>
                   )}
                 </div>
@@ -345,14 +381,17 @@ export default function RecordingInterface() {
 
                 {/* IDLE PLACEHOLDER */}
                 {!previewStream && recordingState === "idle" && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-gradient-to-br from-gray-900 to-black text-center p-8">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-linear-to-br from-gray-900 to-black text-center p-8">
                     <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center ring-1 ring-white/10 shadow-2xl">
                       <Video className="w-10 h-10 text-muted-foreground" />
                     </div>
                     <div className="space-y-2">
-                      <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">Ready to Record</h3>
+                      <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-linear-to-b from-white to-white/60">
+                        Ready to Record
+                      </h3>
                       <p className="text-muted-foreground max-w-sm">
-                        Capture your screen and camera with professional quality.
+                        Capture your screen and camera with professional
+                        quality.
                       </p>
                     </div>
                   </div>
@@ -366,7 +405,9 @@ export default function RecordingInterface() {
                   disabled={recordingState !== "idle"}
                   className={`rounded-full w-16 h-16 p-0 shadow-xl transition-all hover:scale-105 active:scale-95 ${recordingState === "idle" ? "bg-red-500 hover:bg-red-600" : "opacity-50 grayscale"}`}
                 >
-                  <div className={`rounded-full border-2 border-white/20 ${recordingState === 'idle' ? 'w-6 h-6 bg-white' : 'w-6 h-6 border-white'}`} />
+                  <div
+                    className={`rounded-full border-2 border-white/20 ${recordingState === "idle" ? "w-6 h-6 bg-white" : "w-6 h-6 border-white"}`}
+                  />
                 </Button>
 
                 <Button
@@ -384,24 +425,32 @@ export default function RecordingInterface() {
                   onClick={() => setWebcamEnabled((p) => !p)}
                   variant={webcamEnabled ? "default" : "secondary"}
                   className="rounded-full w-12 h-12 p-0 shadow-md transition-all"
-                  disabled={recordingState !== "idle" && recordingState !== "recording"} // Allow toggle during recording
+                  disabled={
+                    recordingState !== "idle" && recordingState !== "recording"
+                  } // Allow toggle during recording
                 >
-                  <Video className={`w-5 h-5 ${webcamEnabled ? "text-white" : "text-muted-foreground"}`} />
+                  <Video
+                    className={`w-5 h-5 ${webcamEnabled ? "text-white" : "text-muted-foreground"}`}
+                  />
                 </Button>
               </div>
             </div>
           )}
 
-
           {/* REVIEW VIEW (Completed) */}
-          {(recordingState === "completed" || recordingState === "uploading" || recordingState === "share-ready") && (
+          {(recordingState === "completed" ||
+            recordingState === "uploading" ||
+            recordingState === "share-ready") && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold tracking-tight">Review Recording</h2>
+                <h2 className="text-2xl font-bold tracking-tight">
+                  Review Recording
+                </h2>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <span className="w-2 h-2 bg-green-500 rounded-full" />
-                  <span className="font-mono">{formatTime(recordingDuration)} recorded</span>
+                  <span className="font-mono">
+                    {formatTime(recordingDuration)} recorded
+                  </span>
                 </div>
               </div>
 
@@ -417,11 +466,12 @@ export default function RecordingInterface() {
 
               {/* Action Card */}
               <div className="bg-card border rounded-xl p-6 shadow-lg space-y-6">
-
                 {/* Input / Info */}
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium mb-1 block">Title / Description</label>
+                    <label className="text-sm font-medium mb-1 block">
+                      Title / Description
+                    </label>
                     <input
                       type="text"
                       placeholder="What is this recording about?"
@@ -437,11 +487,17 @@ export default function RecordingInterface() {
                 {recordingState === "uploading" && (
                   <div className="space-y-4 py-4">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium text-primary">Uploading video...</span>
-                      <span className="font-mono text-muted-foreground">{uploadProgress}%</span>
+                      <span className="font-medium text-primary">
+                        Uploading video...
+                      </span>
+                      <span className="font-mono text-muted-foreground">
+                        {uploadProgress}%
+                      </span>
                     </div>
                     <Progress value={uploadProgress} className="h-2" />
-                    <p className="text-xs text-center text-muted-foreground">Uploading directly to server. We never see your video.</p>
+                    <p className="text-xs text-center text-muted-foreground">
+                      Uploading directly to server. We never see your video.
+                    </p>
                   </div>
                 )}
 
@@ -452,30 +508,47 @@ export default function RecordingInterface() {
                       <div className="p-2 bg-green-500/20 rounded-full">
                         <ExternalLink className="w-5 h-5" />
                       </div>
-                      <h3 className="font-bold text-lg">Your recording is ready!</h3>
+                      <h3 className="font-bold text-lg">
+                        Your recording is ready!
+                      </h3>
                     </div>
 
                     <div className="flex gap-2">
                       <div className="flex-1 bg-background border px-4 py-2 rounded-lg font-mono text-sm flex items-center overflow-hidden">
                         <span className="truncate">{shareLink}</span>
                       </div>
-                      <Button onClick={handleCopyLink} className="shrink-0 gap-2">
+                      <Button
+                        onClick={handleCopyLink}
+                        className="shrink-0 gap-2"
+                      >
                         <Copy className="w-4 h-4" /> Copy
                       </Button>
-                      <Button variant="outline" asChild className="shrink-0 gap-2">
-                        <a href={shareLink} target="_blank" rel="noopener noreferrer">
+                      <Button
+                        variant="outline"
+                        asChild
+                        className="shrink-0 gap-2"
+                      >
+                        <a
+                          href={shareLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           Open <ExternalLink className="w-3 h-3" />
                         </a>
                       </Button>
                     </div>
 
                     <div className="pt-4 border-t border-green-500/10 flex justify-center">
-                      <Button variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={() => {
-                        setRecordingState("idle");
-                        resetRecording();
-                        setShareLink("");
-                        setVideoTitle("");
-                      }}>
+                      <Button
+                        variant="ghost"
+                        className="text-muted-foreground hover:text-foreground"
+                        onClick={() => {
+                          setRecordingState("idle");
+                          resetRecording();
+                          setShareLink("");
+                          setVideoTitle("");
+                        }}
+                      >
                         Record another
                       </Button>
                     </div>
@@ -506,11 +579,27 @@ export default function RecordingInterface() {
                         {/* Inline Discard Confirm */}
                         {showDiscardDialog && (
                           <div className="absolute bottom-full left-0 mb-2 w-64 bg-popover border rounded-lg shadow-xl p-4 z-50 animate-in fade-in slide-in-from-bottom-2">
-                            <h4 className="font-semibold text-sm mb-2">Discard this recording?</h4>
-                            <p className="text-xs text-muted-foreground mb-3">This cannot be undone.</p>
+                            <h4 className="font-semibold text-sm mb-2">
+                              Discard this recording?
+                            </h4>
+                            <p className="text-xs text-muted-foreground mb-3">
+                              This cannot be undone.
+                            </p>
                             <div className="flex gap-2 justify-end">
-                              <Button size="sm" variant="ghost" onClick={() => setShowDiscardDialog(false)}>Cancel</Button>
-                              <Button size="sm" variant="destructive" onClick={handleDiscard}>Discard</Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setShowDiscardDialog(false)}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={handleDiscard}
+                              >
+                                Discard
+                              </Button>
                             </div>
                           </div>
                         )}
@@ -519,20 +608,17 @@ export default function RecordingInterface() {
 
                     <Button
                       size="lg"
-                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/20 gap-2"
+                      className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/20 gap-2"
                       onClick={handleUpload}
                     >
                       <Upload className="w-4 h-4" /> Upload & Share
                     </Button>
                   </div>
                 )}
-
               </div>
             </div>
           )}
-
         </div>
-
       </div>
     </main>
   );
