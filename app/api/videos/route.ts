@@ -5,7 +5,7 @@ import { fetchLinkPreview } from "@/lib/link-preview";
 import { S3Client, HeadObjectCommand } from "@aws-sdk/client-s3";
 
 const s3Client = new S3Client({
-    region: process.env.S3_REGION || "ap-south-1",
+    region: process.env.S3_REGION || "",
     credentials: {
         accessKeyId: process.env.S3_ACCESS_KEY_ID || "",
         secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || "",
@@ -58,6 +58,7 @@ export async function POST(request: Request) {
             description: description || null,
             title: "Untitled Recording", // Default title
         });
+
 
         // 4. Process & Save Links
         if (cleanLinks.length > 0) {

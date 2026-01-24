@@ -21,7 +21,7 @@ import {
 import { usePiPRecording } from "@/lib/hooks/usePiPRecording";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { requestPresignedUrl, uploadToS3 } from "@/lib/upload-utils";
+import { requestPresignedUrl, uploadToS3, saveVideoMetadata } from "@/lib/upload-utils";
 
 type ReviewState = "review" | "uploading" | "success" | "error";
 
@@ -199,7 +199,13 @@ export default function RecordingInterface() {
       });
 
       // 3. Success
-      // TODO: Save metadata to DB (Part 5)
+      // Save metadata to DB
+      await saveVideoMetadata(
+        videoId,
+        videoTitle,
+        "", // Description can be added later if UI supports it
+        []  // Links can be added later if UI supports it
+      );
 
       const shareUrl = `${window.location.origin}/v/${videoId}`;
       setShareData({ videoId, url: shareUrl });
@@ -357,10 +363,10 @@ export default function RecordingInterface() {
 
       {/* COMPLETED / UPLOAD VIEW */}
       {(status === "completed") && (
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 h-[calc(100vh-6rem)] animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 h-[calc(100vh-6rem)] animate-in fade-in slide-in-from-bottom-4 duration-500 p-2 md:p-8">
           {/* LEFT: Video Player */}
           <div className="flex flex-col gap-4 min-h-0">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between border border-slate-200 p-2 rounded bg-slate-100/80">
               <h2 className="text-xl font-semibold">Recording Ready</h2>
               <span className="text-sm font-mono text-muted-foreground bg-secondary px-2 py-1 rounded">
                 {formatTime(recordingDuration)}

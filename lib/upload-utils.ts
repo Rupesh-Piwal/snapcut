@@ -57,3 +57,30 @@ export const uploadToS3 = (
         xhr.send(blob);
     });
 };
+
+/**
+ * Saves video metadata to the database after successful S3 upload.
+ */
+export const saveVideoMetadata = async (
+    videoId: string,
+    title: string,
+    description: string,
+    links: string[] = []
+) => {
+    const response = await fetch("/api/videos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            videoId,
+            title,
+            description,
+            links,
+        }),
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to save video metadata");
+    }
+
+    return response.json();
+};
