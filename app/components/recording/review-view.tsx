@@ -17,8 +17,10 @@ type ReviewState = "review" | "uploading" | "success" | "error";
 interface ReviewViewProps {
     reviewState: ReviewState;
     setReviewState: (state: ReviewState) => void;
-    videoTitle: string;
-    setVideoTitle: (title: string) => void;
+    videoDescription: string;
+    setVideoDescription: (description: string) => void;
+    videoLinks: string[];
+    setVideoLinks: (links: string[]) => void;
     recordedVideoUrl: string | null;
     recordingDuration: number;
     uploadProgress: number;
@@ -33,8 +35,10 @@ interface ReviewViewProps {
 export function ReviewView({
     reviewState,
     setReviewState,
-    videoTitle,
-    setVideoTitle,
+    videoDescription,
+    setVideoDescription,
+    videoLinks,
+    setVideoLinks,
     recordedVideoUrl,
     recordingDuration,
     uploadProgress,
@@ -46,16 +50,22 @@ export function ReviewView({
     onDiscard,
 }: ReviewViewProps) {
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 h-[calc(100vh-6rem)] animate-in fade-in slide-in-from-bottom-4 duration-500 p-2 md:p-8">
+        <div className=" grid grid-cols-1 md:grid-cols-12 gap-2 h-[calc(100vh-1rem)] animate-in fade-in slide-in-from-bottom-4 duration-500 p-2 md:p-8">
             {/* LEFT: Video Player */}
-            <div className="flex flex-col gap-4 min-h-0">
+            <div className="rounded flex flex-col gap-4 min-h-0 col-span-1 md:col-span-8">
                 <div className="flex items-center justify-between border border-slate-200 p-2 rounded bg-slate-100/80">
-                    <h2 className="text-xl font-semibold">Recording Ready</h2>
-                    <span className="text-sm font-mono text-muted-foreground bg-secondary px-2 py-1 rounded">
+                    <h2 className="text-xl font-semibold">SnapCut | Record & Share -
+                        {new Date().toLocaleDateString("en-GB", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                        })}
+                    </h2>
+                    <span className="text-sm font-mono text-muted-foreground bg-slate-200/80 px-2 py-1 rounded-lg">
                         {formatTime(recordingDuration)}
                     </span>
                 </div>
-                <div className="flex-1 bg-black rounded-lg overflow-hidden border border-border shadow-sm">
+                <div className="flex-1 bg-black rounded overflow-hidden border border-border shadow-sm">
                     {recordedVideoUrl && (
                         <video
                             src={recordedVideoUrl}
@@ -67,20 +77,37 @@ export function ReviewView({
             </div>
 
             {/* RIGHT: Actions */}
-            <div className="flex flex-col">
+            <div className="rounded flex flex-col col-span-1 md:col-span-4">
                 <div className="bg-card border rounded-lg p-6 shadow-sm space-y-6">
                     {/* 1. Review Mode */}
                     {reviewState === "review" && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">Title</label>
-                                <input
-                                    type="text"
-                                    placeholder="My Awesome Recording"
-                                    className="w-full bg-background border px-3 py-2 rounded-md focus:ring-2 ring-primary/20 outline-none"
-                                    value={videoTitle}
-                                    onChange={(e) => setVideoTitle(e.target.value)}
+                                <label className="text-sm font-medium">Description</label>
+                                <textarea
+                                    placeholder="What's this video about?"
+                                    className="w-full bg-background border px-3 py-2 rounded-md focus:ring-2 ring-primary/20 outline-none min-h-[80px] resize-none"
+                                    value={videoDescription}
+                                    onChange={(e) => setVideoDescription(e.target.value)}
                                 />
+                            </div>
+
+                            <div className="space-y-3">
+                                <label className="text-sm font-medium">Links (Max 3)</label>
+                                {videoLinks.map((link, index) => (
+                                    <input
+                                        key={index}
+                                        type="url"
+                                        placeholder={`Link #${index + 1}`}
+                                        className="w-full bg-background border px-3 py-2 rounded-md focus:ring-2 ring-primary/20 outline-none text-sm"
+                                        value={link}
+                                        onChange={(e) => {
+                                            const newLinks = [...videoLinks];
+                                            newLinks[index] = e.target.value;
+                                            setVideoLinks(newLinks);
+                                        }}
+                                    />
+                                ))}
                             </div>
                             <div className="flex flex-col gap-3">
                                 <Button size="lg" className="w-full gap-2 bg-primary hover:bg-primary/90" onClick={onUpload}>
@@ -160,18 +187,20 @@ export function ReviewView({
             </div>
 
             {/* Discard Dialog */}
-            {showDiscardDialog && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="bg-background p-6 rounded-lg shadow-xl max-w-sm w-full border">
-                        <h3 className="text-lg font-semibold mb-2">Discard Recording?</h3>
-                        <p className="text-sm text-muted-foreground mb-6">This action cannot be undone. You will lose the current video.</p>
-                        <div className="flex justify-end gap-3">
-                            <Button variant="ghost" onClick={() => setShowDiscardDialog(false)}>Cancel</Button>
-                            <Button variant="destructive" onClick={onDiscard}>Confirm Discard</Button>
+            {
+                showDiscardDialog && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                        <div className="bg-background p-6 rounded-lg shadow-xl max-w-sm w-full border">
+                            <h3 className="text-lg font-semibold mb-2">Discard Recording?</h3>
+                            <p className="text-sm text-muted-foreground mb-6">This action cannot be undone. You will lose the current video.</p>
+                            <div className="flex justify-end gap-3">
+                                <Button variant="ghost" onClick={() => setShowDiscardDialog(false)}>Cancel</Button>
+                                <Button variant="destructive" onClick={onDiscard}>Confirm Discard</Button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }

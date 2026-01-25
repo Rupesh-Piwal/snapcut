@@ -53,7 +53,7 @@ export function ControlBar({
             <div className="h-24 flex items-center justify-center">
                 <button
                     onClick={onStartRecording}
-                    className="group relative flex items-center justify-center gap-3 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-full shadow-lg hover:shadow-red-500/30 transition-all duration-300 transform hover:scale-105"
+                    className="group relative flex items-center justify-center gap-3 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-full shadow-lg hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105"
                 >
                     <div className="w-4 h-4 rounded-full bg-white animate-pulse" />
                     <span className="font-semibold text-lg">Start Recording</span>

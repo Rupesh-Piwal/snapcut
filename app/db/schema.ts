@@ -3,7 +3,6 @@ import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
 export const videos = pgTable("videos", {
   id: text("id").primaryKey(),
   objectKey: text("object_key").notNull(),
-  title: text("title"),
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

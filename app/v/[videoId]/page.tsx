@@ -47,7 +47,7 @@ export default async function VideoSharePage({ params }: PageProps) {
                 {/* HEADER */}
                 <div className="space-y-2">
                     <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white/90">
-                        {video.title || "Untitled Recording"}
+                        Shared Recording
                     </h1>
                     <div className="flex items-center gap-4 text-sm text-white/50">
                         <div className="flex items-center gap-1.5">

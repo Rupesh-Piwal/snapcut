@@ -35,7 +35,8 @@ export default function RecordingInterface() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [shareData, setShareData] = useState<{ videoId: string; url: string } | null>(null);
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
-  const [videoTitle, setVideoTitle] = useState("");
+  const [videoDescription, setVideoDescription] = useState("");
+  const [videoLinks, setVideoLinks] = useState<string[]>(["", "", ""]);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   // --- Runtime Logic ---
@@ -60,7 +61,8 @@ export default function RecordingInterface() {
     setReviewState("review");
     setShowDiscardDialog(false);
     setUploadProgress(0);
-    setVideoTitle("");
+    setVideoDescription("");
+    setVideoLinks(["", "", ""]);
     setShareData(null);
     setUploadError(null);
   };
@@ -85,9 +87,9 @@ export default function RecordingInterface() {
       // Save metadata to DB
       await saveVideoMetadata(
         videoId,
-        videoTitle,
-        "", // Description can be added later if UI supports it
-        []  // Links can be added later if UI supports it
+        "", // Title is unused/optional now
+        videoDescription,
+        videoLinks
       );
 
       const shareUrl = `${window.location.origin}/v/${videoId}`;
@@ -135,8 +137,10 @@ export default function RecordingInterface() {
         <ReviewView
           reviewState={reviewState}
           setReviewState={setReviewState}
-          videoTitle={videoTitle}
-          setVideoTitle={setVideoTitle}
+          videoDescription={videoDescription}
+          setVideoDescription={setVideoDescription}
+          videoLinks={videoLinks}
+          setVideoLinks={setVideoLinks}
           recordedVideoUrl={recordedVideoUrl}
           recordingDuration={recordingDuration}
           uploadProgress={uploadProgress}
