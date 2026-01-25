@@ -50,7 +50,7 @@ export function ReviewView({
     onDiscard,
 }: ReviewViewProps) {
     return (
-        <div className=" grid grid-cols-1 md:grid-cols-12 gap-2 h-[calc(100vh-1rem)] animate-in fade-in slide-in-from-bottom-4 duration-500 p-2 md:p-8">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-2 h-[calc(100vh-1rem)] animate-in fade-in slide-in-from-bottom-4 duration-500 p-2 md:p-8">
             {/* LEFT: Video Player */}
             <div className="rounded flex flex-col gap-4 min-h-0 col-span-1 md:col-span-8">
                 <div className="flex items-center justify-between border border-slate-200 p-2 rounded bg-slate-100/80">
