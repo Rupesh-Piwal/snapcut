@@ -159,12 +159,12 @@ export function RecorderView({
   const isTimeRunningLow = remainingTime <= 10;
 
   return (
-    <div className="flex flex-col h-full text-white overflow-hidden">
+    <div className="flex flex-col text-white overflow-hidden min-h-screen bg-[#0a0a0a]">
       {/* VIDEO AREA */}
-      <div className="flex-1 flex items-center justify-center p-1 h-[calc(100vh-130px)] relative max-w-7xl mx-auto rounded-3xl border border-[#E5E3E2] bg-[#F2F2F2]">
+      <div className="flex-1 flex items-center justify-center p-6 relative">
         <div
           ref={containerRef}
-          className="relative w-full max-w-6xl h-[calc(100vh-106px)] aspect-video bg-[#ffffff] rounded-2xl overflow-hidden border border-[#E5E3E2]"
+          className="relative w-full max-w-7xl h-[calc(100vh-120px)] bg-[#1a1a1a] rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
         >
           <video
             ref={previewVideoRef}
@@ -172,17 +172,17 @@ export function RecorderView({
             playsInline
             autoPlay
             className={cn(
-              "absolute inset-0 w-full h-full object-contain transition-opacity duration-300",
+              "absolute inset-0 w-full h-full object-contain transition-opacity duration-500",
               previewStream ? "opacity-100" : "opacity-0",
             )}
           />
 
           {/* OVERLAYS */}
-          <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+          <div className="absolute top-6 left-6 z-10 flex flex-col gap-3">
             {status === "recording" && (
-              <div className="flex items-center gap-2 bg-red-400/90 text-white px-3 py-1.5 rounded-md backdrop-blur-md shadow-lg animate-in slide-in-from-top-2">
-                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                <span className="text-xs font-bold tracking-wider uppercase">
+              <div className="flex items-center gap-2.5 bg-red-500/15 text-red-400 px-4 py-2 rounded-full backdrop-blur-xl border border-red-500/20 shadow-lg animate-in slide-in-from-top-2 fade-in duration-300">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+                <span className="text-sm font-semibold tracking-wide">
                   REC
                 </span>
               </div>
@@ -192,15 +192,15 @@ export function RecorderView({
           {status === "recording" && (
             <div
               className={cn(
-                "absolute top-4 right-4 z-10 px-3 py-1.5 rounded-md font-mono text-sm font-medium backdrop-blur-md transition-colors duration-300 flex items-center gap-2",
+                "absolute top-6 right-6 z-10 px-4 py-2 rounded-full font-mono text-sm font-medium backdrop-blur-xl transition-all duration-300 flex items-center gap-2.5 border shadow-lg",
                 isTimeRunningLow
-                  ? "bg-red-500/90 text-white animate-pulse"
-                  : "bg-black/40 text-white",
+                  ? "bg-red-500/15 text-red-400 border-red-500/20 animate-pulse"
+                  : "bg-white/5 text-white border-white/10",
               )}
             >
-              <Timer className="w-4 h-4 cursor-pointer" />
-              {formatTime(recordingDuration)}
-              <span className="opacity-60 text-xs">
+              <Timer className="w-4 h-4" />
+              <span className="font-semibold">{formatTime(recordingDuration)}</span>
+              <span className="opacity-50 text-xs font-normal">
                 / {formatTime(MAX_RECORDING_DURATION)}
               </span>
             </div>
@@ -209,7 +209,7 @@ export function RecorderView({
           {webcamEnabled && previewStream && isInitialized && (
             <div
               onMouseDown={handleMouseDown}
-              className="absolute z-20 cursor-move rounded-lg overflow-hidden shadow-lg ring-1 ring-white/20 hover:ring-white/40 transition-all duration-200"
+              className="absolute z-20 cursor-move rounded-2xl overflow-hidden shadow-2xl ring-2 ring-white/20 hover:ring-white/40 transition-all duration-300 hover:scale-105"
               style={{
                 left: webcamPos.x,
                 top: webcamPos.y,
@@ -218,14 +218,20 @@ export function RecorderView({
               }}
             >
               {/* This div represents the webcam overlay area where dragging is captured */}
-              <div className="w-full h-full bg-transparent" />
+              <div className="w-full h-full bg-transparent backdrop-blur-sm" />
             </div>
           )}
 
           {!previewStream && status === "idle" && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center p-8">
-              <div className="w-24 h-24 rounded-full bg-[#E5E3E2]/30 border border-[#E5E3E2] flex items-center justify-center mb-4">
-                <Video className="w-8 h-8 text-gray-400" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 text-center p-8">
+              <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-2 animate-in zoom-in-50 fade-in duration-500">
+                <Video className="w-10 h-10 text-white/40" />
+              </div>
+              <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
+                <h3 className="text-xl font-semibold text-white/80">Ready to Record</h3>
+                <p className="text-sm text-white/40 max-w-md">
+                  Click "Start Recording" to begin capturing your screen
+                </p>
               </div>
             </div>
           )}

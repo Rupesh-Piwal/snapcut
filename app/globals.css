@@ -130,7 +130,7 @@
 
 :root {
   /* Light Theme - Clean & Modern */
-  --background: oklch(0.995 0.001 294.72);
+  --background: oklch(0.15 0.01 294.72);
   --foreground: oklch(0.15 0.01 294.72);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.15 0.01 294.72);
@@ -209,6 +209,6 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-[#000101] text-foreground;
   }
 }

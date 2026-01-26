@@ -59,104 +59,104 @@ export function ControlBar({
 
   if (status === "idle") {
     return (
-      <div className="h-24 border-2 border-red-400 flex items-center justify-center">
+      <div className="h-20 flex items-center justify-center pb-6">
         <button
           onClick={onStartRecording}
-          className="group relative flex items-center justify-center gap-3 bg-[#F7F5F2] hover:bg-[#F7F5F2]/90 text-[#000101] px-6 py-2 rounded-full hover:shadow-[#F7F5F2] transition-all duration-300 transform hover:scale-105 border border-[#E5E3E2]"
+          className="group relative flex items-center justify-center gap-3 bg-white hover:bg-white/95 text-black px-8 py-3.5 rounded-full hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer font-semibold text-base"
         >
-          <span className="font-semibold text-lg">Start Recording</span>
+          <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
+          <span>Start Recording</span>
         </button>
       </div>
     );
   }
 
   return (
-    <div className="h-24 flex items-center justify-center pointer-events-none">
+    <div className="h-16 flex items-center justify-center pointer-events-none pb-6">
       {/* Floating Bar Container */}
-      <div className="pointer-events-auto bg-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 p-2 flex items-center gap-4 animate-in slide-in-from-bottom-10 fade-in duration-500">
+      <div className="pointer-events-auto bg-[#1a1a1a]/95 backdrop-blur-xl rounded-full shadow-[0_8px_40px_rgb(0,0,0,0.5)] border border-white/10 p-1 flex items-center gap-4 animate-in slide-in-from-bottom-10 fade-in duration-500">
         {/* Main Controls Group */}
-        <div className="flex items-center bg-[#F3F4F6] rounded-full px-1.5 py-1.5 gap-1">
+        <div className="flex items-center bg-[#0a0a0a] rounded-full px-2 py-1 gap-1.5">
           {/* Stop Button */}
           <button
             onClick={onStopRecording}
-            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white hover:shadow-sm transition-all text-gray-500 hover:text-red-600 group"
+            className="w-11 h-11 flex items-center justify-center rounded-full hover:bg-[#1a1a1a] transition-all text-white/60 hover:text-red-400 group"
             title="Stop Recording"
           >
-            <div className="w-10 h-10 flex items-center justify-center bg-gray-400/50 rounded-full group-hover:bg-red-100 transition-colors">
-              <div className="w-3.5 h-3.5 bg-white rounded-[2px] shadow-sm transform group-hover:scale-110 transition-transform" />
+            <div className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-full group-hover:bg-red-500/20 transition-all duration-200">
+              <div className="w-3 h-3 bg-white rounded-[3px] shadow-sm transform group-hover:scale-110 transition-transform" />
             </div>
           </button>
 
           {/* Timer */}
-          <div className="px-3 font-mono text-gray-700 font-medium min-w-[60px] text-center select-none">
+          <div className="px-4 font-mono text-white font-semibold min-w-20 text-center select-none text-base">
             {formattedTime}
           </div>
 
           {/* Restart */}
           <button
             onClick={onReset}
-            className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-900 hover:bg-white hover:shadow-sm transition-all"
+            className="w-9 h-9 flex items-center justify-center rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-all duration-200"
             title="Restart"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-4.5 h-4.5" />
           </button>
 
           {/* Pause */}
           <button
             onClick={onPause}
-            className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-900 hover:bg-white hover:shadow-sm transition-all"
+            className="w-9 h-9 flex items-center justify-center rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-all duration-200"
             title="Pause"
           >
-            <Pause className="w-4 h-4" />
+            <Pause className="w-4.5 h-4.5" />
           </button>
 
           {/* Delete */}
           <button
             onClick={onDelete}
-            className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-red-600 hover:bg-white hover:shadow-sm transition-all"
+            className="w-9 h-9 flex items-center justify-center rounded-full text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200"
             title="Delete"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-4.5 h-4.5" />
           </button>
         </div>
 
         {/* Divider */}
-        <div className="w-px h-8 bg-gray-200" />
+        <div className="w-px h-9 bg-white/10" />
 
         {/* Tools Group */}
-        <div className="text-gray-400">
-          <button className="w-9 h-9 flex items-center justify-center rounded-full hover:text-indigo-600 hover:bg-indigo-50 transition-all">
-            <Pen className="w-4.5 h-4.5" />
+        <div className="text-white/40">
+          <button className="w-10 h-10 flex items-center justify-center rounded-full hover:text-white hover:bg-white/10 transition-all duration-200">
+            <Pen className="w-5 h-5" />
           </button>
         </div>
 
         {/* Divider */}
-        <div className="w-px h-8 bg-gray-200" />
+        <div className="w-px h-9 bg-white/10" />
 
         {/* Toggles Group */}
-        <div className="flex items-center gap-2 pr-1">
-          {/* Cam Toggle (Mapped to Pen/Tools area in image? I will keep it separate or next to Mic as it is essential) */}
-          {/* The image doesn't explicitly show cam, but we need it. I'll make it subtle or similar to Mic */}
+        <div className="flex items-center gap-2 pr-1.5">
+          {/* Cam Toggle */}
           <button
             onClick={onToggleWebcam}
             className={cn(
-              "w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200",
+              "w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200",
               webcamEnabled
-                ? "bg-purple-100 text-purple-600 hover:bg-purple-200"
-                : "bg-gray-100 text-gray-400 hover:bg-gray-200",
+                ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 ring-1 ring-purple-500/30"
+                : "bg-white/10 text-white/40 hover:bg-white/20",
             )}
             title="Toggle Webcam"
           >
             {webcamEnabled ? (
-              <Video className="w-5 h-5" />
+              <Video className="w-4 h-4" />
             ) : (
-              <VideoOff className="w-5 h-5" />
+              <VideoOff className="w-4 h-4" />
             )}
           </button>
 
           {/* Mic Toggle */}
-          <div className="w-10 h-10 flex items-center justify-center rounded-full bg-green-100 text-green-600 cursor-pointer hover:bg-green-200 transition-colors">
-            <Mic className="w-5 h-5" />
+          <div className="w-8 h-8 flex items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 cursor-pointer hover:bg-emerald-500/30 transition-all duration-200 ring-1 ring-emerald-500/30">
+            <Mic className="w-4 h-4" />
           </div>
         </div>
       </div>
