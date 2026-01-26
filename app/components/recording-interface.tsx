@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { usePiPRecording } from "@/lib/hooks/usePiPRecording";
-import { requestPresignedUrl, uploadToS3, saveVideoMetadata } from "@/lib/upload-utils";
+import {
+  requestPresignedUrl,
+  uploadToS3,
+  saveVideoMetadata,
+} from "@/lib/upload-utils";
 import { LoadingView } from "./recording/loading-view";
 import { RecorderView } from "./recording/recorder-view";
 import { ReviewView } from "./recording/review-view";
@@ -24,7 +28,7 @@ export default function RecordingInterface() {
     recordedVideoUrl,
     recordedBlob,
     resetRecording,
-    MAX_RECORDING_DURATION
+    MAX_RECORDING_DURATION,
   } = usePiPRecording();
 
   // --- Local UI State ---
@@ -33,7 +37,10 @@ export default function RecordingInterface() {
   // Review / Upload State
   const [reviewState, setReviewState] = useState<ReviewState>("review");
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [shareData, setShareData] = useState<{ videoId: string; url: string } | null>(null);
+  const [shareData, setShareData] = useState<{
+    videoId: string;
+    url: string;
+  } | null>(null);
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
   const [videoDescription, setVideoDescription] = useState("");
   const [videoLinks, setVideoLinks] = useState<string[]>(["", "", ""]);
@@ -76,7 +83,9 @@ export default function RecordingInterface() {
 
     try {
       // 1. Get Presigned URL
-      const { videoId, uploadUrl } = await requestPresignedUrl(recordedBlob.size);
+      const { videoId, uploadUrl } = await requestPresignedUrl(
+        recordedBlob.size,
+      );
 
       // 2. Upload to S3
       await uploadToS3(recordedBlob, uploadUrl, (progress) => {
@@ -89,13 +98,12 @@ export default function RecordingInterface() {
         videoId,
         "", // Title is unused/optional now
         videoDescription,
-        videoLinks
+        videoLinks,
       );
 
       const shareUrl = `${window.location.origin}/v/${videoId}`;
       setShareData({ videoId, url: shareUrl });
       setReviewState("success");
-
     } catch (err) {
       console.error("Upload failed:", err);
       setUploadError(err instanceof Error ? err.message : "Upload failed");
@@ -113,7 +121,7 @@ export default function RecordingInterface() {
   // 2. RECORDING / IDLE VIEW
   if (status === "idle" || status === "recording") {
     return (
-      <main className="flex-1 max-w-7xl mx-auto h-screen bg-background border-2 border-yellow-500">
+      <main className="flex-1 max-w-8xl mx-auto h-screen bg-[#FFFFFF] mt-4">
         <RecorderView
           status={status}
           webcamEnabled={webcamEnabled}
