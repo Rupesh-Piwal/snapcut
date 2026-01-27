@@ -32,7 +32,7 @@ export default function RecordingInterface() {
   } = usePiPRecording();
 
   // --- Local UI State ---
-  const [webcamEnabled, setWebcamEnabled] = useState(false);
+  const [webcamEnabled, setWebcamEnabled] = useState(true);
 
   // Review / Upload State
   const [reviewState, setReviewState] = useState<ReviewState>("review");

@@ -88,8 +88,32 @@ export const usePiPRecording = () => {
         webcamConfigRef.current = { ...webcamConfigRef.current, ...config };
     }, []);
 
+
+
+    // Step 1: Pre-request webcam permission
+    // When user clicks Start Recording (before screen picker): 
+    // stream.getTracks().forEach(track => track.stop());
+
+    // Step 2: Then request screen capture
+
+
+
+    // --------------------- //
+
+    let lastFrameTs = performance.now();
+
+    // --------------------- //
+
     // --- Drawing Loop (Same as before) ---
     const drawFrame = useCallback(() => {
+        const now = performance.now();
+        const delta = now - lastFrameTs;
+        lastFrameTs = now;
+
+        console.log("rAF delta(ms):", Math.round(delta));
+
+
+
         const ctx = ctxRef.current;
         const canvas = canvasRef.current;
         const screenVideo = screenVideoRef.current;
@@ -219,7 +243,7 @@ export const usePiPRecording = () => {
     }, [state.status]); // Depend on status to know when to kill things? Actually cleanup should be idempotent.
 
     // --- Start Recording ---
-    const startRecording = async (withWebcam: boolean = false) => {
+    const startRecording = async (withWebcam: boolean = true) => {
         // Enforce FSM Transition
         if (!fsmRef.current.transition("initializing")) return;
         updateState();
@@ -233,7 +257,25 @@ export const usePiPRecording = () => {
                 error: null
             }));
 
-            // 1. Get Streams
+            // STEP 1: Preflight webcam permission BEFORE screen capture
+            // This prevents the poor UX where user has to switch tabs to grant permission
+            // after getDisplayMedia() steals focus to the captured screen.
+            if (withWebcam) {
+                try {
+                    const preflightStream = await navigator.mediaDevices.getUserMedia({
+                        video: { width: 1280, height: 720 },
+                        audio: true,
+                    });
+                    // Immediately stop all tracks - we only needed permission grant
+                    preflightStream.getTracks().forEach(track => track.stop());
+                    console.log("Webcam permission preflight successful");
+                } catch (err) {
+                    console.warn("Webcam preflight failed:", err);
+                    // Continue without webcam if permission denied
+                }
+            }
+
+            // STEP 2: Get screen capture (this steals focus to captured screen)
             const displayStream = await navigator.mediaDevices.getDisplayMedia({
                 video: {
                     width: { ideal: CANVAS_WIDTH },
@@ -251,6 +293,7 @@ export const usePiPRecording = () => {
                 performStop();
             };
 
+            // STEP 3: Re-acquire webcam stream for actual recording (permission already granted)
             let userStream: MediaStream | null = null;
             if (withWebcam) {
                 try {
@@ -261,7 +304,7 @@ export const usePiPRecording = () => {
                     webcamStreamRef.current = userStream;
                     microphoneStreamRef.current = userStream;
                 } catch (err) {
-                    console.warn("Webcam failed:", err);
+                    console.warn("Webcam acquisition failed:", err);
                     // Don't fail the whole recording, just proceed without cam
                 }
             }

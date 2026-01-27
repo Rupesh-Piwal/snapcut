@@ -19,13 +19,13 @@ import { cn } from "@/lib/utils";
 
 interface ControlBarProps {
   status:
-    | "idle"
-    | "dest"
-    | "initializing"
-    | "recording"
-    | "stopping"
-    | "completed"
-    | "error";
+  | "idle"
+  | "dest"
+  | "initializing"
+  | "recording"
+  | "stopping"
+  | "completed"
+  | "error";
   onStartRecording: () => void;
   onStopRecording: () => void;
   webcamEnabled: boolean;
@@ -59,7 +59,29 @@ export function ControlBar({
 
   if (status === "idle") {
     return (
-      <div className="h-20 flex items-center justify-center pb-6">
+      <div className="h-24 flex flex-col items-center justify-center pb-6 gap-4">
+        {/* Webcam Toggle - Before Recording */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onToggleWebcam}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 text-sm font-medium",
+              webcamEnabled
+                ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 ring-1 ring-purple-500/30"
+                : "bg-white/10 text-white/50 hover:bg-white/20",
+            )}
+            title="Toggle Webcam"
+          >
+            {webcamEnabled ? (
+              <Video className="w-4 h-4" />
+            ) : (
+              <VideoOff className="w-4 h-4" />
+            )}
+            <span>{webcamEnabled ? "Webcam On" : "Webcam Off"}</span>
+          </button>
+        </div>
+
+        {/* Start Button */}
         <button
           onClick={onStartRecording}
           className="group relative flex items-center justify-center gap-3 bg-white hover:bg-white/95 text-black px-8 py-3.5 rounded-full hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer font-semibold text-base"
