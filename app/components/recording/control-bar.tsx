@@ -14,13 +14,13 @@ import { cn } from "@/lib/utils";
 
 interface ControlBarProps {
   status:
-  | "idle"
-  | "dest"
-  | "initializing"
-  | "recording"
-  | "stopping"
-  | "completed"
-  | "error";
+    | "idle"
+    | "dest"
+    | "initializing"
+    | "recording"
+    | "stopping"
+    | "completed"
+    | "error";
   onStartRecording: () => void;
   onStopRecording: () => void;
   webcamEnabled: boolean;
@@ -44,7 +44,6 @@ export function ControlBar({
   recordingDuration = 0,
   onReset,
   onPause,
-  onDelete,
 }: ControlBarProps) {
   const [formattedTime, setFormattedTime] = useState("00:00");
 
@@ -63,12 +62,12 @@ export function ControlBar({
         <div className="flex flex-col items-center gap-2">
           <button
             onClick={onStartRecording}
-            className="w-[180px] h-20 bg-[#f84d4d] hover:bg-[#ff5f5f] text-white rounded-[24px] flex items-center justify-center gap-2 transition-all duration-200 shadow-lg group"
+            className="bg-[#f84d4d] hover:bg-[#ff5f5f] text-white rounded-[14px] flex items-center justify-center gap-2 transition-all duration-200 shadow-lg group px-7 py-3 cursor-pointer"
           >
             <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center">
               <div className="w-2.5 h-2.5 bg-[#f84d4d] rounded-full group-hover:scale-90 transition-transform" />
             </div>
-            <span className="text-xl font-bold tracking-tight">Record</span>
+            <span className="text-lg font-semibold tracking-tight">Record</span>
           </button>
           <span className="text-sm font-medium text-gray-400">Start</span>
         </div>
@@ -78,13 +77,13 @@ export function ControlBar({
           <button
             onClick={onToggleMic}
             className={cn(
-              "w-20 h-20 flex items-center justify-center rounded-[24px] transition-all duration-200",
+              "p-2 flex items-center justify-center rounded-[24px] transition-all duration-200 cursor-pointer",
               micEnabled
                 ? "bg-[#2a2a2a] text-white hover:bg-[#333333]"
                 : "bg-[#2a2a2a]/40 text-gray-600 hover:bg-[#2a2a2a]/60",
             )}
           >
-            <Mic className={cn("w-8 h-8", !micEnabled && "opacity-40")} />
+            <Mic className={cn("w-5 h-5", !micEnabled && "opacity-40")} />
           </button>
           <span className="text-sm font-medium text-gray-400">Mic</span>
         </div>
@@ -94,16 +93,16 @@ export function ControlBar({
           <button
             onClick={onToggleWebcam}
             className={cn(
-              "w-20 h-20 flex items-center justify-center rounded-[24px] transition-all duration-200",
+              "p-2 flex items-center justify-center rounded-[14px] transition-all duration-200 cursor-pointer",
               webcamEnabled
                 ? "bg-[#2a2a2a] text-white hover:bg-[#333333]"
                 : "bg-[#2a2a2a]/40 text-gray-600 hover:bg-[#2a2a2a]/60",
             )}
           >
             {webcamEnabled ? (
-              <Video className="w-8 h-8" />
+              <Video className="w-5 h-5" />
             ) : (
-              <VideoOff className="w-8 h-8 opacity-40" />
+              <VideoOff className="w-5 h-5 opacity-40" />
             )}
           </button>
           <span className="text-sm font-medium text-gray-400">Cam</span>

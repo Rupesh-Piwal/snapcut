@@ -204,7 +204,7 @@ export function ReviewView({
           {reviewState === "success" && shareData && (
             <div className="space-y-6 animate-in fade-in duration-300 flex flex-col flex-1">
               <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                <CheckCircle className="w-5 h-5 shrink-0" />
                 <span className="font-semibold">Upload Complete</span>
               </div>
 
@@ -256,7 +256,7 @@ export function ReviewView({
           {reviewState === "error" && (
             <div className="space-y-6 animate-in fade-in duration-300 flex flex-col flex-1">
               <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <AlertCircle className="w-5 h-5 shrink-0" />
                 <span className="font-semibold">Upload Failed</span>
               </div>
               <p className="text-sm text-red-400">
