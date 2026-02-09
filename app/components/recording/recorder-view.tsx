@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 
 interface RecorderViewProps {
   status:
-  | "idle"
-  | "recording"
-  | "initializing"
-  | "stopping"
-  | "completed"
-  | "error";
+    | "idle"
+    | "recording"
+    | "initializing"
+    | "stopping"
+    | "completed"
+    | "error";
   webcamEnabled: boolean;
   previewStream: MediaStream | null;
   recordingDuration: number;
@@ -191,7 +191,7 @@ export function RecorderView({
         ) : (
           <div
             ref={containerRef}
-            className="relative w-full max-w-420 h-[calc(100vh-100px)] bg-black/30 backdrop-blur-3xl rounded-3xl overflow-hidden border border-white/10 shadow-2xl ring-1 ring-white/5"
+            className="relative w-full max-w-420 h-[calc(100vh-220px)] bg-black/30 backdrop-blur-3xl rounded-3xl overflow-hidden border border-white/10 shadow-2xl ring-1 ring-white/5"
           >
             {/* Recording Preview (shows during recording) */}
             {isRecordingActive && (
@@ -257,7 +257,7 @@ export function RecorderView({
 
                 {/* Webcam Preview (Right) - Always visible if camera enabled */}
                 {permissions.camera && webcamEnabled && webcamPreviewStream && (
-                  <div className="w-1/3 relative bg-black/20 flex items-center justify-center border-l border-white/10 backdrop-blur-sm">
+                  <div className="w-125 h-121.5 relative bg-black/20 flex items-center justify-center border-l border-white/10 backdrop-blur-sm">
                     <video
                       ref={webcamVideoRef}
                       muted
@@ -319,9 +319,9 @@ export function RecorderView({
         micEnabled={micEnabled}
         onToggleMic={onToggleMic}
         recordingDuration={recordingDuration}
-        onReset={() => { }}
-        onPause={() => { }}
-        onDelete={() => { }}
+        onReset={() => {}}
+        onPause={() => {}}
+        onDelete={() => {}}
         screenShareEnabled={permissions.screen}
         onToggleScreenShare={onRequestScreen}
         canRecord={canRecord}

@@ -36,6 +36,7 @@ export type PermissionErrorType =
     | 'DEVICE_BUSY'
     | 'NO_DEVICE'
     | 'HTTPS_REQUIRED'
+    | 'USER_CANCELLED'
     | 'UNKNOWN'
     | null;
 
@@ -339,6 +340,9 @@ export const usePiPRecording = () => {
     // Screen Share Logic
     const requestScreenShare = useCallback(async () => {
         console.log("[Permissions] Requesting Screen Share...");
+        setPermissionError(null);
+        setPermissionErrorType(null);
+
         try {
             const displayStream = await navigator.mediaDevices.getDisplayMedia({
                 video: {
@@ -368,8 +372,24 @@ export const usePiPRecording = () => {
             screenVideoRef.current = sVideo;
 
             setPermissions(prev => ({ ...prev, screen: true }));
-        } catch (error) {
+        } catch (error: any) {
             console.warn("[Permissions] Screen Share Denied:", error);
+
+            stopStreamTracks(screenStreamRef.current);
+            screenStreamRef.current = null;
+            if (screenVideoRef.current) {
+                screenVideoRef.current.srcObject = null;
+                screenVideoRef.current = null;
+            }
+            setScreenPreviewStream(null);
+
+            if (error.name === "AbortError" || error.name === "NotAllowedError") {
+                setPermissionErrorType('USER_CANCELLED');
+                setPermissionError("Screen share was cancelled. Click 'Screen' to try again.");
+            } else {
+                setPermissionErrorType('UNKNOWN');
+                setPermissionError(error.message || "Failed to share screen.");
+            }
         }
     }, []);
 
