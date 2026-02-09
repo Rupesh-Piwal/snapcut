@@ -353,7 +353,7 @@ export const PostProcessor = forwardRef<PostProcessorRef, PostProcessorProps>(
     return (
       <div className="relative w-full h-full bg-black/40 flex flex-col group">
         {/* Hidden Sources */}
-        <div className="hidden m-[100px]">
+        <div className="hidden">
           {screenUrl && (
             <video
               ref={screenVideoRef}

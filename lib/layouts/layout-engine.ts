@@ -21,27 +21,43 @@ export interface LayoutMode {
         cameraVideo: HTMLVideoElement | null,
         width: number,
         height: number,
-        background?: BackgroundOption | HTMLImageElement // Option metadata OR preloaded image element
+        background?: BackgroundOption | HTMLImageElement
     ) => void;
 }
 
-// Helper: Draw Background
+// ==========================================
+// UTILITIES (Deliverables)
+// ==========================================
+
+const GAP = 24;
+const PADDING = 24;
+const CORNER_RADIUS = 16;
+const PIP_FACTOR = 0.25; // 25% of height
+
+interface Rect {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+}
+
+// Helper: Resolve Background
 const drawBackground = (
     ctx: CanvasRenderingContext2D,
     w: number,
     h: number,
     bg?: BackgroundOption | HTMLImageElement
 ) => {
-    // 1. Default to black
+    // Clear first
+    ctx.clearRect(0, 0, w, h);
+
     if (!bg) {
         ctx.fillStyle = "#000";
         ctx.fillRect(0, 0, w, h);
         return;
     }
 
-    // 2. Handle HTMLImageElement (Preloaded) - logic from post-processor
     if (bg instanceof HTMLImageElement) {
-        // Draw cover
         const aspect = w / h;
         const imgAspect = bg.naturalWidth / bg.naturalHeight;
         let sx = 0, sy = 0, sw = bg.naturalWidth, sh = bg.naturalHeight;
@@ -55,10 +71,8 @@ const drawBackground = (
         }
         ctx.drawImage(bg, sx, sy, sw, sh, 0, 0, w, h);
         return;
-
     }
 
-    // 3. Handle BackgroundOption
     if (bg.type === "none") {
         ctx.fillStyle = "#000";
         ctx.fillRect(0, 0, w, h);
@@ -66,23 +80,12 @@ const drawBackground = (
     }
 
     if (bg.type === "gradient") {
-        // Parse gradient string roughly or use a fixed implementation for the known presets?
-        // Presets are simplistic linear-gradients.
-        // Value format: "linear-gradient(135deg, #color1 0%, #color2 100%)"
-        // Canvas gradients are x1,y1,x2,y2. 
-        // Mapping CSS angles to Canvas coords is non-trivial for general cases.
-        // For this specific feature with known presets, we can approximate or use a simple vertical/diagonal.
-        // Let's implement a robust enough parser for the 10 presets (mostly 135deg or vertical).
-
-        const gradient = ctx.createLinearGradient(0, 0, w, h); // Default diagonal top-left to bottom-right
-        // Simple parsing for the predefined constants
-        // Regex to find colors
+        const gradient = ctx.createLinearGradient(0, 0, w, h);
         const colors = bg.value.match(/#[a-fA-F0-9]{6}/g);
         if (colors && colors.length >= 2) {
             gradient.addColorStop(0, colors[0]);
             gradient.addColorStop(1, colors[1]);
         } else {
-            // Fallback
             gradient.addColorStop(0, "#333");
             gradient.addColorStop(1, "#000");
         }
@@ -91,169 +94,301 @@ const drawBackground = (
         return;
     }
 
-    // If type image but passed as option (not loaded element) => can't draw immediately.
-    // Should fallback to black, caller must preload.
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, w, h);
 };
 
-// Helper: Draw video keeping aspect ratio to cover or contain
-const drawVideo = (
-    ctx: CanvasRenderingContext2D,
-    video: HTMLVideoElement,
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    mode: "cover" | "contain" = "contain"
-) => {
-    if (video.readyState < 2) return; // Not ready
+// Helper: Clip Rounded Rect
+const clipRoundedRect = (ctx: CanvasRenderingContext2D, r: Rect, radius: number) => {
+    ctx.beginPath();
+    ctx.roundRect(r.x, r.y, r.w, r.h, radius);
+    ctx.clip();
+};
 
+// Helper: Clip Circle
+const clipCircle = (ctx: CanvasRenderingContext2D, x: number, y: number, r: number) => {
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.clip();
+};
+
+// Core Drawing Function
+const drawVideoInRect = (
+    ctx: CanvasRenderingContext2D,
+    video: HTMLVideoElement | null,
+    rect: Rect,
+    mode: "contain" | "cover",
+    shape: "round-rect" | "circle" = "round-rect"
+) => {
+    if (!video || video.readyState < 2) return;
+
+    ctx.save();
+
+    // 1. Apply Shape Clip
+    if (shape === "circle") {
+        // For circle, rect.w should equal rect.h (diameter)
+        const radius = rect.w / 2;
+        const cx = rect.x + radius;
+        const cy = rect.y + radius;
+        clipCircle(ctx, cx, cy, radius);
+    } else {
+        clipRoundedRect(ctx, rect, CORNER_RADIUS);
+    }
+
+    // 2. Draw Video
     const vw = video.videoWidth;
     const vh = video.videoHeight;
-    const videoAspect = vw / vh;
-    const destAspect = w / h;
+    const va = vw / vh;
+    const da = rect.w / rect.h;
 
-    let sx = 0, sy = 0, sw = vw, sh = vh;
+    let sx = 0, sy = 0, sw = vw, sh = vh; // source
+    let dx = rect.x, dy = rect.y, dw = rect.w, dh = rect.h; // dest
 
     if (mode === "cover") {
-        if (videoAspect > destAspect) {
-            sw = vh * destAspect;
+        if (va > da) {
+            sw = vh * da;
             sx = (vw - sw) / 2;
         } else {
-            sh = vw / destAspect;
+            sh = vw / da;
             sy = (vh - sh) / 2;
         }
+        ctx.drawImage(video, sx, sy, sw, sh, dx, dy, dw, dh);
     } else {
-        // contain
-        if (videoAspect > destAspect) {
-            // video is wider than slot - fit width
-            const drawH = w / videoAspect;
-            const drawY = y + (h - drawH) / 2;
-            ctx.drawImage(video, 0, 0, vw, vh, x, drawY, w, drawH);
-            return;
+        // Contain logic: We need to center the video within the rect
+        // BUT we must fill the "black bars" within the clip area?
+        // Typically for a styled layout, "contain" means:
+        // Draw black (or transparent) background first to fill the shape, then draw video.
+        ctx.fillStyle = "#000";
+        ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+
+        if (va > da) {
+            // Video is wider
+            const drawH = rect.w / va;
+            const DrawY = rect.y + (rect.h - drawH) / 2;
+            ctx.drawImage(video, 0, 0, vw, vh, rect.x, DrawY, rect.w, drawH);
         } else {
-            // video is taller than slot - fit height
-            const drawW = h * videoAspect;
-            const drawX = x + (w - drawW) / 2;
-            ctx.drawImage(video, 0, 0, vw, vh, drawX, y, drawW, h);
-            return;
+            // Video is taller
+            const drawW = rect.h * va;
+            const DrawX = rect.x + (rect.w - drawW) / 2;
+            ctx.drawImage(video, 0, 0, vw, vh, DrawX, rect.y, drawW, rect.h);
         }
     }
 
-    ctx.drawImage(video, sx, sy, sw, sh, x, y, w, h);
+    ctx.restore();
 };
 
-// ==========================================
-// RENDER FUNCTIONS
-// ==========================================
-
-const renderScreenCameraBR: LayoutMode["render"] = (ctx, screen, camera, w, h, bg) => {
-    drawBackground(ctx, w, h, bg);
-
-    if (screen) drawVideo(ctx, screen, 0, 0, w, h, "contain");
-
-    // 2. Draw Camera (Bottom Right)
-    if (camera) {
-        const camW = w * 0.2; // 20% width
-        const camH = camW * (camera.videoHeight / camera.videoWidth) || camW * (9 / 16); // Maintain aspect or default
-        const padding = 32; // 16px padding requested, but 32 looks better on 1080p usually. Request said 16px.
-        const x = w - camW - 16;
-        const y = h - camH - 16;
-
-        ctx.save();
-        // Rounded rect clip
-        ctx.beginPath();
-        ctx.roundRect(x, y, camW, camH, 16);
-        ctx.clip();
-        drawVideo(ctx, camera, x, y, camW, camH, "cover");
-        ctx.restore();
-
-        // Border
-        ctx.strokeStyle = "rgba(255,255,255,0.2)";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-    }
+const drawScreenVideo = (ctx: CanvasRenderingContext2D, video: HTMLVideoElement | null, rect: Rect) => {
+    drawVideoInRect(ctx, video, rect, "contain", "round-rect");
 };
 
-const renderScreenCameraBL: LayoutMode["render"] = (ctx, screen, camera, w, h, bg) => {
+const drawCameraVideo = (ctx: CanvasRenderingContext2D, video: HTMLVideoElement | null, rect: Rect, isPip: boolean) => {
+    drawVideoInRect(ctx, video, rect, "cover", isPip ? "circle" : "round-rect");
+};
+
+
+// ==========================================
+// LAYOUT LOGIC
+// ==========================================
+
+const renderScreenCameraSideRight: LayoutMode["render"] = (ctx, screen, camera, w, h, bg) => {
     drawBackground(ctx, w, h, bg);
 
-    if (screen) drawVideo(ctx, screen, 0, 0, w, h, "contain");
+    // Layout 1: Screen Left, Camera Right
+    // "Camera video width ~ 25-30% of canvas width"
+    // "Small horizontal gap"
+    // "Equal vertical alignment" (Same height, centered)
 
-    if (camera) {
-        const camW = w * 0.2;
-        const camH = camW * (camera.videoHeight / camera.videoWidth) || camW * (9 / 16);
-        const x = 16;
-        const y = h - camH - 16;
+    const totalWidth = w - (PADDING * 2);
+    const availableHeight = h - (PADDING * 2);
 
-        ctx.save();
-        ctx.beginPath();
-        ctx.roundRect(x, y, camW, camH, 16);
-        ctx.clip();
-        drawVideo(ctx, camera, x, y, camW, camH, "cover");
-        ctx.restore();
-    }
+    const cameraWidth = totalWidth * 0.3; // 30%
+    const screenWidth = totalWidth - cameraWidth - GAP;
+
+    // Both utilize full available height to maximize size, but maintain aspect within containers
+    const screenRect: Rect = {
+        x: PADDING,
+        y: PADDING,
+        w: screenWidth,
+        h: availableHeight
+    };
+
+    const cameraRect: Rect = {
+        x: PADDING + screenWidth + GAP,
+        y: PADDING,
+        w: cameraWidth,
+        h: availableHeight
+    };
+
+    if (screen) drawScreenVideo(ctx, screen, screenRect);
+    if (camera) drawCameraVideo(ctx, camera, cameraRect, false);
 };
 
 const renderScreenCameraSideLeft: LayoutMode["render"] = (ctx, screen, camera, w, h, bg) => {
     drawBackground(ctx, w, h, bg);
 
-    const camW = w * 0.3; // 30% width
-    const screenW = w - camW;
+    // Layout 2: Camera Left, Screen Right
+    // Mirrored
 
-    // Camera Left
-    if (camera) {
-        // Center vertically in the strip
-        drawVideo(ctx, camera, 0, 0, camW, h, "cover");
-    }
+    const totalWidth = w - (PADDING * 2);
+    const availableHeight = h - (PADDING * 2);
 
-    // Screen Right
-    if (screen) {
-        drawVideo(ctx, screen, camW, 0, screenW, h, "contain");
-    }
+    const cameraWidth = totalWidth * 0.3;
+    const screenWidth = totalWidth - cameraWidth - GAP;
+
+    const cameraRect: Rect = {
+        x: PADDING,
+        y: PADDING,
+        w: cameraWidth,
+        h: availableHeight
+    };
+
+    const screenRect: Rect = {
+        x: PADDING + cameraWidth + GAP,
+        y: PADDING,
+        w: screenWidth,
+        h: availableHeight
+    };
+
+    if (screen) drawScreenVideo(ctx, screen, screenRect);
+    if (camera) drawCameraVideo(ctx, camera, cameraRect, false);
 };
 
-const renderScreenCameraSideRight: LayoutMode["render"] = (ctx, screen, camera, w, h, bg) => {
+const renderScreenCameraBL: LayoutMode["render"] = (ctx, screen, camera, w, h, bg) => {
     drawBackground(ctx, w, h, bg);
 
-    const camW = w * 0.3;
-    const screenW = w - camW;
+    // Layout 3: PiP Bottom Left
+    // Screen fills most of canvas (with padding/rounded)
+    // Camera is CIRCULAR, bottom-left
 
-    // Screen Left
-    if (screen) {
-        drawVideo(ctx, screen, 0, 0, screenW, h, "contain");
-    }
+    const screenRect: Rect = {
+        x: PADDING,
+        y: PADDING,
+        w: w - (PADDING * 2),
+        h: h - (PADDING * 2)
+    };
 
-    // Camera Right
+    if (screen) drawScreenVideo(ctx, screen, screenRect);
+
     if (camera) {
-        drawVideo(ctx, camera, screenW, 0, camW, h, "cover");
+        // PiP Size
+        const pipSize = h * PIP_FACTOR; // 25% of height
+        const pipPadding = PADDING + 32; // padding from corner (inside screen rect)
+
+        const pipRect: Rect = {
+            x: pipPadding,
+            y: h - pipPadding - pipSize,
+            w: pipSize, // Circle diameter
+            h: pipSize  // Circle diameter
+        };
+
+        // Draw border for PiP?
+        // Reference image shows simple circle. Often a border helps visibility.
+        // Prompt says "Circular PiP", "clipped to perfect circle".
+        // Let's add a small white border for polish, consistent with "precise layout".
+        // But "No UI changes" -> "Output code only". I will stick to minimal.
+
+        // Draw Shadow?
+        ctx.save();
+        ctx.shadowColor = "rgba(0,0,0,0.5)";
+        ctx.shadowBlur = 20;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 4;
+
+        drawCameraVideo(ctx, camera, pipRect, true);
+
+        // Border
+        ctx.beginPath();
+        const r = pipRect.w / 2;
+        ctx.arc(pipRect.x + r, pipRect.y + r, r, 0, Math.PI * 2);
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "white";
+        ctx.stroke();
+
+        ctx.restore();
     }
 };
+
+const renderScreenCameraBR: LayoutMode["render"] = (ctx, screen, camera, w, h, bg) => {
+    drawBackground(ctx, w, h, bg);
+
+    // Layout 4: PiP Bottom Right
+
+    const screenRect: Rect = {
+        x: PADDING,
+        y: PADDING,
+        w: w - (PADDING * 2),
+        h: h - (PADDING * 2)
+    };
+
+    if (screen) drawScreenVideo(ctx, screen, screenRect);
+
+    if (camera) {
+        const pipSize = h * PIP_FACTOR;
+        const pipPadding = PADDING + 32;
+
+        const pipRect: Rect = {
+            x: w - pipPadding - pipSize,
+            y: h - pipPadding - pipSize,
+            w: pipSize,
+            h: pipSize
+        };
+
+        ctx.save();
+        ctx.shadowColor = "rgba(0,0,0,0.5)";
+        ctx.shadowBlur = 20;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 4;
+
+        drawCameraVideo(ctx, camera, pipRect, true);
+
+        // Border
+        ctx.beginPath();
+        const r = pipRect.w / 2;
+        ctx.arc(pipRect.x + r, pipRect.y + r, r, 0, Math.PI * 2);
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "white";
+        ctx.stroke();
+
+        ctx.restore();
+    }
+};
+
+// --- Single Source Layouts ---
 
 const renderCameraOnlyCenter: LayoutMode["render"] = (ctx, screen, camera, w, h, bg) => {
     drawBackground(ctx, w, h, bg);
     if (camera) {
-        // "Camera fills most of the frame" - maybe 80% size? or just contain with black bars?
-        // "Maintain aspect ratio"
-        drawVideo(ctx, camera, 0, 0, w, h, "contain");
+        // Center with padding
+        const rect: Rect = {
+            x: PADDING,
+            y: PADDING,
+            w: w - (PADDING * 2),
+            h: h - (PADDING * 2)
+        };
+        drawVideoInRect(ctx, camera, rect, "contain", "round-rect");
     }
 };
 
 const renderCameraOnlyFull: LayoutMode["render"] = (ctx, screen, camera, w, h, bg) => {
-    // If full screen camera, background is hidden anyway unless camera transparent (unlikely)
-    // But good practice to draw it.
     drawBackground(ctx, w, h, bg);
     if (camera) {
-        // "Fill entire frame" -> cover
-        drawVideo(ctx, camera, 0, 0, w, h, "cover");
+        drawVideoInRect(ctx, camera, { x: 0, y: 0, w, h }, "cover", "round-rect"); // Full screen usually means no rounded corners? 
+        // But let's assume raw video. But if we want consistent aesthetics?
+        // "Full" usually means full canvas.
+        ctx.drawImage(camera, 0, 0, w, h);
     }
 };
 
 const renderScreenOnly: LayoutMode["render"] = (ctx, screen, camera, w, h, bg) => {
     drawBackground(ctx, w, h, bg);
     if (screen) {
-        drawVideo(ctx, screen, 0, 0, w, h, "contain");
+        const rect: Rect = {
+            x: PADDING,
+            y: PADDING,
+            w: w - (PADDING * 2),
+            h: h - (PADDING * 2)
+        };
+        drawScreenVideo(ctx, screen, rect);
     }
 };
 
@@ -262,18 +397,14 @@ const renderScreenOnly: LayoutMode["render"] = (ctx, screen, camera, w, h, bg) =
 // ==========================================
 
 export const LAYOUTS: LayoutMode[] = [
-    // Group 1: Screen + Camera
     { id: "screen-camera-br", label: "Bottom Right", icon: PictureInPicture, render: renderScreenCameraBR },
-    { id: "screen-camera-bl", label: "Bottom Left", icon: PictureInPicture, render: renderScreenCameraBL }, // Icon reuse ok?
+    { id: "screen-camera-bl", label: "Bottom Left", icon: PictureInPicture, render: renderScreenCameraBL },
     { id: "screen-camera-left", label: "Camera Left", icon: LayoutTemplate, render: renderScreenCameraSideLeft },
     { id: "screen-camera-right", label: "Camera Right", icon: LayoutTemplate, render: renderScreenCameraSideRight },
-
-    // Group 2: Camera Only
     { id: "camera-only-center", label: "Centered", icon: Square, render: renderCameraOnlyCenter },
     { id: "camera-only-full", label: "Full Screen", icon: RectangleHorizontal, render: renderCameraOnlyFull },
-
-    // Group 3: Screen Only
     { id: "screen-only", label: "Screen Only", icon: Monitor, render: renderScreenOnly },
 ];
 
 export const getLayout = (id: LayoutId) => LAYOUTS.find(l => l.id === id) || LAYOUTS[0];
+

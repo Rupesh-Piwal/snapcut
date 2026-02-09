@@ -7,7 +7,9 @@ import {
     cleanupRecording,
 } from "../record-utils";
 import { BunnyRecordingState, RecordingState } from "../types";
+
 import { RecordingStateMachine } from "../recording-state-machine";
+import { getLayout } from "../layouts/layout-engine";
 
 // Configuration Constants
 const CANVAS_WIDTH = 1920;
@@ -406,75 +408,19 @@ export const usePiPRecording = () => {
 
         if (!ctx || !canvas) return;
 
-        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        ctx.fillStyle = "#000000";
-        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        // Default to Side-by-Side (Screen Left)
+        const layoutId = "screen-camera-right";
+        const layout = getLayout(layoutId);
 
-        const isCamActive = webcamVideo && webcamVideo.readyState >= 2 && webcamStreamRef.current && cameraEnabled;
-        const isScreenActive = screenVideo && screenVideo.readyState >= 2;
-
-        if (isCamActive) {
-            const camX = SPLIT_SCREEN_WIDTH;
-            const camY = 0;
-            const camW = SPLIT_WEBCAM_WIDTH;
-            const camH = CANVAS_HEIGHT;
-
-            const videoW = webcamVideo.videoWidth;
-            const videoH = webcamVideo.videoHeight;
-            const videoAspect = videoW / videoH;
-            const destAspect = camW / camH;
-
-            let sx = 0, sy = 0, sw = videoW, sh = videoH;
-
-            if (videoAspect > destAspect) {
-                sw = videoH * destAspect;
-                sx = (videoW - sw) / 2;
-            } else {
-                sh = videoW / destAspect;
-                sy = (videoH - sh) / 2;
-            }
-
-            ctx.drawImage(webcamVideo, sx, sy, sw, sh, camX, camY, camW, camH);
-
-            if (isScreenActive) {
-                const screenW = SPLIT_SCREEN_WIDTH;
-                const screenH = CANVAS_HEIGHT;
-                const sVideoW = screenVideo.videoWidth;
-                const sVideoH = screenVideo.videoHeight;
-                const sAspect = sVideoW / sVideoH;
-                const dAspect = screenW / screenH;
-
-                let drawW = screenW, drawH = screenH, drawX = 0, drawY = 0;
-
-                if (sAspect > dAspect) {
-                    drawH = screenW / sAspect;
-                    drawY = (screenH - drawH) / 2;
-                } else {
-                    drawW = screenH * sAspect;
-                    drawX = (screenW - drawW) / 2;
-                }
-                ctx.drawImage(screenVideo, 0, 0, sVideoW, sVideoH, drawX, drawY, drawW, drawH);
-            }
-
-        } else {
-            if (isScreenActive) {
-                const sVideoW = screenVideo.videoWidth;
-                const sVideoH = screenVideo.videoHeight;
-                const sAspect = sVideoW / sVideoH;
-                const dAspect = CANVAS_WIDTH / CANVAS_HEIGHT;
-
-                let drawW = CANVAS_WIDTH, drawH = CANVAS_HEIGHT, drawX = 0, drawY = 0;
-
-                if (sAspect > dAspect) {
-                    drawH = CANVAS_WIDTH / sAspect;
-                    drawY = (CANVAS_HEIGHT - drawH) / 2;
-                } else {
-                    drawW = CANVAS_HEIGHT * sAspect;
-                    drawX = (CANVAS_WIDTH - drawW) / 2;
-                }
-                ctx.drawImage(screenVideo, 0, 0, sVideoW, sVideoH, drawX, drawY, drawW, drawH);
-            }
-        }
+        // Render using layout engine
+        layout.render(
+            ctx,
+            screenVideo,
+            webcamVideo,
+            CANVAS_WIDTH,
+            CANVAS_HEIGHT,
+            undefined
+        );
 
         animationFrameRef.current = requestAnimationFrame(drawFrame);
     }, [cameraEnabled]);
