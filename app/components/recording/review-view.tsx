@@ -224,13 +224,13 @@ export function ReviewView({
                   </button>
 
                   <TabsContent value="image" className="mt-0">
-                    <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                    <div className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
                       {BACKGROUND_IMAGES.map((bg) => (
                         <button
                           key={bg.id}
                           onClick={() => setSelectedBackground(bg)}
                           className={cn(
-                            "relative group aspect-video rounded-lg overflow-hidden border transition-all",
+                            "relative group aspect-video rounded-lg overflow-hidden border transition-all h-15 w-20",
                             selectedBackground.id === bg.id
                               ? "border-indigo-500 ring-2 ring-indigo-500/20"
                               : "border-white/10 hover:border-white/30"
@@ -239,7 +239,7 @@ export function ReviewView({
                           <img
                             src={bg.preview}
                             alt={bg.label}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover cursor-pointer"
                             loading="lazy"
                           />
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
@@ -254,13 +254,13 @@ export function ReviewView({
                   </TabsContent>
 
                   <TabsContent value="gradient" className="mt-0">
-                    <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                    <div className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
                       {BACKGROUND_GRADIENTS.map((bg) => (
                         <button
                           key={bg.id}
                           onClick={() => setSelectedBackground(bg)}
                           className={cn(
-                            "relative group aspect-video rounded-lg overflow-hidden border transition-all",
+                            "relative group aspect-video rounded-lg overflow-hidden border transition-all h-15 w-20",
                             selectedBackground.id === bg.id
                               ? "border-indigo-500 ring-2 ring-indigo-500/20"
                               : "border-white/10 hover:border-white/30"

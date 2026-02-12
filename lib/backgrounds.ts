@@ -86,15 +86,15 @@ export const BACKGROUND_IMAGES: BackgroundOption[] = [
         id: "image-office",
         label: "Modern Office",
         type: "image",
-        value: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1920&auto=format&fit=crop",
-        preview: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=200&auto=format&fit=crop"
+        value: "https://images.unsplash.com/photo-1511300636408-a63a89df3482?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGRlc2t0b3AlMjB3YWxscGFwZXJzfGVufDB8fDB8fHww",
+        preview: "https://images.unsplash.com/photo-1511300636408-a63a89df3482?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGRlc2t0b3AlMjB3YWxscGFwZXJzfGVufDB8fDB8fHww"
     },
     {
         id: "image-desk",
         label: "Wood Desk",
         type: "image",
-        value: "https://images.unsplash.com/photo-1493219686098-9563d5964766?q=80&w=1920&auto=format&fit=crop",
-        preview: "https://images.unsplash.com/photo-1493219686098-9563d5964766?q=80&w=200&auto=format&fit=crop"
+        value: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8ZGVza3RvcCUyMHdhbGxwYXBlcnN8ZW58MHx8MHx8fDA%3D",
+        preview: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8ZGVza3RvcCUyMHdhbGxwYXBlcnN8ZW58MHx8MHx8fDA%3D"
     },
     {
         id: "image-abstract-geo",

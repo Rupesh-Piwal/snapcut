@@ -351,7 +351,8 @@ export const PostProcessor = forwardRef<PostProcessorRef, PostProcessorProps>(
     useEffect(() => setLayoutId(initialLayout), [initialLayout]);
 
     return (
-      <div className="relative w-full h-full bg-black/40 flex flex-col group">
+      <div className="relative w-full aspect-video bg-black/40 flex flex-col group">
+
         {/* Hidden Sources */}
         <div className="hidden">
           {screenUrl && (
@@ -383,8 +384,9 @@ export const PostProcessor = forwardRef<PostProcessorRef, PostProcessorProps>(
           ref={canvasRef}
           width={1920}
           height={1080}
-          className="w-full h-full object-contain bg-black"
+          className="w-full h-full bg-transparent"
         />
+
 
         {/* Custom Controls Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
