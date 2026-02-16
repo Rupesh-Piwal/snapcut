@@ -10,6 +10,7 @@ import { ControlBar } from "./control-bar";
 import { formatTime } from "./utils";
 import { PreviewStage } from "./preview-stage";
 import {
+  ArrowCounterClockwiseIcon,
   CameraIcon,
   CursorClickIcon,
   VideoCameraIcon,
@@ -17,12 +18,12 @@ import {
 
 export interface RecorderViewProps {
   status:
-  | "idle"
-  | "recording"
-  | "initializing"
-  | "stopping"
-  | "completed"
-  | "error";
+    | "idle"
+    | "recording"
+    | "initializing"
+    | "stopping"
+    | "completed"
+    | "error";
   webcamEnabled: boolean;
   previewStream: MediaStream | null; // Keep for "is ready" check
   recordingDuration: number;
@@ -97,7 +98,6 @@ export function RecorderView({
 }: RecorderViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-
 
   useEffect(() => {
     if (containerRef.current && !isInitialized) {
@@ -223,9 +223,10 @@ export function RecorderView({
                 <Button
                   onClick={onRequestCameraMic}
                   size="lg"
-                  className="bg-[#6366f1] hover:bg-[#5558dd] text-white px-8 h-12 rounded-xl font-medium transition-all duration-200 mt-4"
+                  className="bg-white/90 hover:bg-white text-black px-8 h-12 rounded-xl font-medium transition-all duration-200 mt-4 cursor-pointer"
                 >
                   Try again
+                  <ArrowCounterClockwiseIcon size={32} />
                 </Button>
               </>
             ) : (
@@ -248,7 +249,7 @@ export function RecorderView({
                     size="lg"
                     className="w-full h-13 text-[18px] font-semibold bg-white/90 hover:bg-white text-black shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-all duration-300 hover:shadow-[0_0_40px_rgba(255,255,255,0.2)] backdrop-blur-sm cursor-pointer tracking-wide"
                   >
-                    <VideoCameraIcon size={22} weight="duotone" />
+                    <VideoCameraIcon size={32} weight="duotone" />
                     Enable camera & microphone
                   </Button>
                 </div>
@@ -362,6 +363,6 @@ export function RecorderView({
         onSetWebcamSize={setWebcamSize}
         micStream={micStream}
       />
-    </div >
+    </div>
   );
 }

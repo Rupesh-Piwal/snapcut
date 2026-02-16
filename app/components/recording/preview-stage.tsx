@@ -7,7 +7,7 @@ interface PreviewStageProps {
     videoRef: React.RefObject<HTMLVideoElement | null>;
     screenSourceRef: React.RefObject<HTMLVideoElement | null>;
     cameraSourceRef: React.RefObject<HTMLVideoElement | null>;
-    className?: string; // For layout (e.g. absolute inset-0)
+    className?: string; 
     // Optional: Pass through events if needed (pointer events for drag)
     onPointerDown?: (e: React.PointerEvent) => void;
     onPointerMove?: (e: React.PointerEvent) => void;
