@@ -1,5 +1,5 @@
 import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
-import * as authSchema from "../../auth-schema";
+
 
 export const videos = pgTable("videos", {
   id: text("id").primaryKey(),
@@ -26,8 +26,4 @@ export const videoLinks = pgTable("video_links", {
 export const schema = {
   videos,
   videoLinks,
-  users: authSchema.users,
-  session: authSchema.session,
-  account: authSchema.account,
-  verification: authSchema.verification,
 };
